@@ -1,15 +1,40 @@
 #include "IRremote.h"
+#include "pitches.h"
+#include "NewTone.h"
 
 int RECEIVER = 13;
 int ENABLE = 5;
 int DIRA = 3;
 int DIRB = 4;
 int POWER = 10;
+int BUZZER = 8;
 
 IRrecv irrecv(RECEIVER); // 受信で使用するオブジェクトを作成 'irrecv'
 decode_results results;  // 受信情報の格納先を作成 'results'
 
 int count = 0;
+
+int pui[] = {NOTE_G6, NOTE_B6, NOTE_G6, NOTE_B6,0};
+int op[] = {NOTE_A5, NOTE_FS5, NOTE_A5, NOTE_B5, 0, NOTE_C5, NOTE_D5, NOTE_E5, NOTE_FS5, NOTE_D5, 0, 0, NOTE_A5, NOTE_FS5, NOTE_A5, NOTE_B5, 0, NOTE_D5, NOTE_D5, NOTE_E5, NOTE_E5, NOTE_FS5, 0, 0, NOTE_G4, NOTE_FS4, NOTE_F4, NOTE_E4, 0, NOTE_A5, NOTE_FS5, NOTE_A5, NOTE_B5, 0, NOTE_C5, NOTE_D5, NOTE_E5, NOTE_FS5, NOTE_D5, 0};
+int duration = 50;
+
+void OP(){
+  //オープニングの最後のところが流れる
+  int length = sizeof(op) / sizeof(*op);
+  for (int thisNote = 0; thisNote < length; thisNote++) {
+    NewTone(BUZZER, op[thisNote], duration);
+    delay(100);
+  }
+}
+
+void PUI(){
+  //鳴き声が流れる
+  int length = sizeof(pui) / sizeof(*pui);
+  for (int thisNote = 0; thisNote < length; thisNote++) {
+    NewTone(BUZZER, pui[thisNote], duration);
+    delay(100);
+  }
+}
 
 void setup() {
   // put your setup code here, to run once:
@@ -64,6 +89,14 @@ void translateIR() // takes action based on IR code received
     case 0xFFA857: Serial.println("VOL-");
       //後進
       BackMotor();
+      break;
+    case 0xFF30CF: Serial.println("1");
+      //オープニングが流れる
+      OP();
+      break;
+    case 0xFF18E7: Serial.println("2");
+      //鳴き声が流れる
+      PUI();
       break;
     default: 
     Serial.println(" other button   ");
